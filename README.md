@@ -30,3 +30,11 @@
   - 是否存在子依赖包dependencies
   - 解析的源码sourceCode
   - 代码解析： vue->html、css、js      es6->es5
+
+## 04 模块解析
+
+- 使用AST语法树解析
+- 如const n = 1 -> const x = 1
+- 将代码中的require 变成` __webpack_require__`
+- 将require("./xxx") 补全require("./xxx.js") 
+- 收集dependencies
