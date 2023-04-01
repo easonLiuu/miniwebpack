@@ -1,4 +1,5 @@
 let path = require("path")
+let ejs = require("ejs")
 let fs = require("fs")
 let babylon = require("babylon")
 let types = require("@babel/types")
@@ -19,7 +20,28 @@ class Compiler {
     }
     //读取模块内容
     getSource(modulePath) {
-        return fs.readFileSync(modulePath, "utf-8")
+        // return fs.readFileSync(modulePath, "utf-8")
+        // for loader
+        let rules = this.config.module.rules
+        let content = fs.readFileSync(modulePath, "utf-8")
+        for (let i = 0; i < rules.length; i++){
+            let rule = rules[i]
+            let { test, use } = rule
+            let len = use.length - 1 //loader的总长度
+            // 判断是不是less
+            if (test.test(modulePath)) {
+                function normalLoader() {
+                    // 是less文件
+                    let loader = require(use[len--]) //从右到左
+                    content = loader(content)
+                    if (len >= 0) {
+                        normalLoader()
+                    }
+                }
+                normalLoader()
+            }
+        }
+        return content
     }
     //模块文件解析 source--文件内容 parentPath--文件目录
     //解析结果 - 是否存在子依赖包dependencies 解析的源码sourceCode
@@ -74,9 +96,19 @@ class Compiler {
             this.buildModule(path.join(this.root, dep), false)
         })
     }
+    //打包文件
+    emitFile() {
+        let main = path.join(this.config.output.path, this.config.output.filename)
+        let templateStr = this.getSource(path.join(__dirname, "bundle.ejs"))
+        let result = ejs.render(templateStr, { entryId: this.entryId, modules: this.modules})
+        this.assets = {}
+        this.assets[main] = result //文件全名--文件内容
+        fs.writeFileSync(main, this.assets[main])
+    }
     //执行方法 用于编译
     run() {
         this.buildModule(path.resolve(this.root, this.entry), true)
+        this.emitFile()
     }
 }
 
