@@ -38,3 +38,19 @@
 - 将代码中的require 变成` __webpack_require__`
 - 将require("./xxx") 补全require("./xxx.js") 
 - 收集dependencies
+
+## 05 打包输出
+
+- 使用模版生成my.js，传入的参数必须是动态的
+- 模版express ejs <%=xxx%>
+- 使用fs将生成的文件写入bundle.js，使用index.html引入打开测试与之前webpack打包输出一致
+
+## 06 loader
+
+- less sass vue...
+- 作用：转化，less->css、vue->js、html、css
+- 使用nix webpack打包less
+- 使用自定义loader less-loader style-loader
+- 打包时使用自定义loader
+
+## 07 plugin
