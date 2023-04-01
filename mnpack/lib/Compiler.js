@@ -5,6 +5,7 @@ let babylon = require("babylon")
 let types = require("@babel/types")
 let traverse = require("@babel/traverse").default
 let generator = require("@babel/generator").default
+let { SyncHook } = require("tapable") //发布订阅
 //babylon @babel/traverse @babel/types @babel/generator
 //编译器
 class Compiler {
@@ -17,7 +18,23 @@ class Compiler {
         this.root = process.cwd()
         //用来保存所有模块依赖
         this.modules = {}
-    }
+        //添加钩子
+        this.hooks = {
+            entryOption: new SyncHook(), //开始钩子
+            compile: new SyncHook(), //编译钩子
+            afterCompile: new SyncHook(), //编译后
+            run: new SyncHook(), //运行
+            emit: new SyncHook(), //发射
+            done: new SyncHook() //完成
+        }
+        // for plugins
+        let plugins = this.config.module.plugins
+        if (Array.isArray(plugins)) {
+            plugins.forEach(p => {
+                p.apply(this)
+            })
+        }
+    } 
     //读取模块内容
     getSource(modulePath) {
         // return fs.readFileSync(modulePath, "utf-8")
@@ -107,8 +124,14 @@ class Compiler {
     }
     //执行方法 用于编译
     run() {
+        //这些钩子会消费对应注册进来的函数
+        this.hooks.run.call() //消费
+        this.hooks.compile.call() //编译
         this.buildModule(path.resolve(this.root, this.entry), true)
+        this.hooks.afterCompile.call() //编译完成
+        this.hooks.emit.call()
         this.emitFile()
+        this.hooks.done.call()
     }
 }
 

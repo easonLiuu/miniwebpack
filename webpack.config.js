@@ -1,4 +1,5 @@
 let path = require("path")
+let myPlugin = require("./plugin/myPlugin")
 
 module.exports = {
     mode: "development", //开发模式
@@ -19,6 +20,9 @@ module.exports = {
                     // "less-loader" //把less转成css
                 ]
             }
+        ],
+        plugins: [
+            new myPlugin()
         ]
     }
 }
