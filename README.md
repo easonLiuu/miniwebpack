@@ -53,4 +53,8 @@
 - 使用自定义loader less-loader style-loader
 - 打包时使用自定义loader
 
-## 07 plugin
+## 07 手写plugin
+
+- 代码加工：压缩，合并，混淆
+- tapable----发布订阅模式处理plugin的事件处理流程
+- 需要一个固定的apply方法，会在编译器中调用
